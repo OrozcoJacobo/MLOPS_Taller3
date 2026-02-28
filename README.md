@@ -19,5 +19,4 @@
     3. Preprocesar datos para entrenamiento
     4. Entrenar modelo eusando lo datos preprocesados de la BD
 
-4. El API de ingerencia que use los modelos que entreno Airflow
-
+4. El API de ingerencia que use los modelos que entreno Airflows
