@@ -1,13 +1,23 @@
 [project]
 name = "airflow-pinguinos"
 version = "0.1.0"
-description = "Add your description here"
+description = "Pipeline MLOps con Airflow y API para Palmer Penguins"
 readme = "README.md"
 authors = [
     { name = "OrozcoJacobo", email = "orozcojacobo1@gmail.com" }
 ]
-requires-python = ">=3.12"
-dependencies = []
+requires-python = ">=3.11"
+
+dependencies = [
+    "pandas",
+    "sqlalchemy>=2.0",
+    "pymysql",
+    "scikit-learn",
+    "joblib",
+    "palmerpenguins",
+    "fastapi",
+    "uvicorn[standard]"
+]
 
 [project.scripts]
 airflow-pinguinos = "airflow_pinguinos:main"
