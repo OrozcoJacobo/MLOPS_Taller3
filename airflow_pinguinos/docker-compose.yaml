@@ -1,111 +1,67 @@
-x-airflow-common:
-  &airflow-common
-  image: apache/airflow:2.6.0
-  env_file:
-    - .env
-  environment:
-    &airflow-common-env
-    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
-    AIRFLOW__CORE__FERNET_KEY: ''
-    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
-    AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
-    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'true'
-    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
-    # Muy importante: que Airflow vea nuestro paquete Python
-    PYTHONPATH: /opt/airflow/src
-    # Aquí luego podríamos pedir instalar libs extra dentro del contenedor
-    _PIP_ADDITIONAL_REQUIREMENTS: ''
-  volumes:
-    - ./dags:/opt/airflow/dags
-    - ./logs:/opt/airflow/logs
-    - ./plugins:/opt/airflow/plugins
-    - ./src:/opt/airflow/src
-  user: "${AIRFLOW_UID:-50000}:0"
-  depends_on:
-    postgres:
-      condition: service_healthy
-    redis:
-      condition: service_started
-
 services:
-  # Base de datos de metadatos de Airflow
+
   postgres:
-    image: postgres:13
+    image: postgres:15
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
-      interval: 10s
+      interval: 5s
       retries: 5
-    volumes:
-      - postgres-db-volume:/var/lib/postgresql/data
 
-  # Broker para CeleryExecutor
-  redis:
-    image: redis:7.2
-
-  # Base de datos EXCLUSIVA de datos de penguins (lo que pide el taller)
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: penguins_db
-      MYSQL_USER: penguins
-      MYSQL_PASSWORD: penguins
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql-data:/var/lib/mysql
-
-  # Inicialización de la base de Airflow (migraciones, usuario admin, etc.)
   airflow-init:
-    <<: *airflow-common
-    command: ["bash", "-c", "airflow db init && airflow users create --username airflow --password airflow --firstname Admin --lastname User --role Admin --email admin@example.com || true"]
+    image: airflow-pinguinos:local
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_started
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__WEBSERVER__SECRET_KEY: "supersecretkey"
+      AIRFLOW__CORE__FERNET_KEY: "0123456789abcdef0123456789abcdef"
+    entrypoint: /bin/bash
+    command: >
+      -c "airflow db migrate && airflow users create --username admin --password admin --firstname Jacobo --lastname Admin --role Admin --email admin@example.com"
+    restart: "no"
 
-  # Scheduler de Airflow
-  airflow-scheduler:
-    <<: *airflow-common
-    command: scheduler
+  airflow-webserver:
+    image: airflow-pinguinos:local
     depends_on:
+      postgres:
+        condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
-
-  # Webserver de Airflow
-  airflow-webserver:
-    <<: *airflow-common
-    command: webserver
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__WEBSERVER__SECRET_KEY: "supersecretkey"
+      AIRFLOW__CORE__FERNET_KEY: "0123456789abcdef0123456789abcdef"
     ports:
       - "8080:8080"
-    depends_on:
-      airflow-init:
-        condition: service_completed_successfully
+    command: webserver
+    restart: always
 
-  # Worker para ejecutar tasks (porque usamos CeleryExecutor)
-  airflow-worker:
-    <<: *airflow-common
-    command: celery worker
+  airflow-scheduler:
+    image: airflow-pinguinos:local
     depends_on:
+      postgres:
+        condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
-
-  # Triggerer (necesario en versiones recientes de Airflow)
-  airflow-triggerer:
-    <<: *airflow-common
-    command: triggerer
-    depends_on:
-      airflow-init:
-        condition: service_completed_successfully
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__WEBSERVER__SECRET_KEY: "supersecretkey"
+      AIRFLOW__CORE__FERNET_KEY: "0123456789abcdef0123456789abcdef"
+    command: scheduler
+    restart: always
 
 volumes:
-  postgres-db-volume:
-  mysql-data:
+  postgres_data:

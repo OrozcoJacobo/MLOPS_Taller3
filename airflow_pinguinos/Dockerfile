@@ -22,9 +22,9 @@ WORKDIR /opt/airflow
 # Instalar dependencias del proyecto con pip
 # (requirements.txt fue generado con uv en tu máquina)
 # =========================================================
-COPY requirements.txt ./
+# COPY requirements.txt ./
 
-RUN pip install --no-cache-dir -r requirements.txt
+# RUN pip install --no-cache-dir -r requirements.txt
 
 # =========================================================
 # Copiar DAGs, plugins y código fuente
