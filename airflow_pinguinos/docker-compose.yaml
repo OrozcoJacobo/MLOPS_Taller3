@@ -1,5 +1,4 @@
 services:
-
   postgres:
     image: postgres:15
     environment:
@@ -43,9 +42,22 @@ services:
       AIRFLOW__CORE__LOAD_EXAMPLES: "False"
       AIRFLOW__WEBSERVER__SECRET_KEY: "supersecretkey"
       AIRFLOW__CORE__FERNET_KEY: "0123456789abcdef0123456789abcdef"
-    entrypoint: /bin/bash
-    command: >
-      -c "airflow db migrate && airflow users create --username admin --password admin --firstname Jacobo --lastname Admin --role Admin --email admin@example.com"
+      MODELS_DIR: /opt/airflow/models
+    volumes:
+      - models_dir:/opt/airflow/models
+    # Usamos la forma de lista: ["bash", "-c", "comando..."]
+    entrypoint:
+      - bash
+      - -c
+      - |
+        airflow db migrate && \
+        airflow users create \
+          --username admin \
+          --password admin \
+          --firstname Jacobo \
+          --lastname Admin \
+          --role Admin \
+          --email admin@example.com
     restart: "no"
 
   airflow-webserver:
@@ -56,24 +68,19 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
-      penguins-db:                # 👈 nuevo: espera a MySQL
-        condition: service_healthy
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "False"
       AIRFLOW__WEBSERVER__SECRET_KEY: "supersecretkey"
       AIRFLOW__CORE__FERNET_KEY: "0123456789abcdef0123456789abcdef"
-      # Opcional, pero explícito para tu config.py
-      MYSQL_HOST: penguins-db
-      MYSQL_PORT: "3306"
-      MYSQL_USER: penguins_user
-      MYSQL_PASSWORD: penguins_pass
-      MYSQL_DB: penguins_db
+      MODELS_DIR: /opt/airflow/models
     ports:
       - "8080:8080"
     command: webserver
     restart: always
+    volumes:
+      - models_dir:/opt/airflow/models
 
   airflow-scheduler:
     image: airflow-pinguinos:local
@@ -82,23 +89,44 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
-      penguins-db:                # 👈 nuevo: espera a MySQL
-        condition: service_healthy
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "False"
       AIRFLOW__WEBSERVER__SECRET_KEY: "supersecretkey"
       AIRFLOW__CORE__FERNET_KEY: "0123456789abcdef0123456789abcdef"
-      MYSQL_HOST: penguins-db
-      MYSQL_PORT: "3306"
-      MYSQL_USER: penguins_user
-      MYSQL_PASSWORD: penguins_pass
-      MYSQL_DB: penguins_db
+      MODELS_DIR: /opt/airflow/models
     command: scheduler
     restart: always
+    volumes:
+      - models_dir:/opt/airflow/models
+
+  penguins-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: penguins-api
+    depends_on:
+      penguins-db:
+        condition: service_healthy
+    environment:
+      MODELS_DIR: /opt/airflow/models
+      MYSQL_HOST: penguins-db
+      MYSQL_PORT: "3306"
+      MYSQL_DB: penguins_db
+      MYSQL_USER: penguins_user
+      MYSQL_PASSWORD: penguins_pass
+    volumes:
+      - models_dir:/opt/airflow/models
+    command: >
+      python -m uvicorn airflow_pinguinos.api:app
+      --host 0.0.0.0
+      --port 8000
+    ports:
+      - "8000:8000"
 
 volumes:
   postgres_data:
   airflow_logs:
   penguins_db_data:
+  models_dir:

@@ -19,19 +19,23 @@ RUN apt-get update && \
 USER airflow
 WORKDIR /opt/airflow
 
-# 👇 **AÑADE ESTA LÍNEA**
+# Para que /opt/airflow esté en el PYTHONPATH y pueda encontrar
+# el paquete airflow_pinguinos
 ENV PYTHONPATH=/opt/airflow
 
 # =========================================================
 # Instalar dependencias de Python que usa tu proyecto
-# (joblib, pandas, scikit-learn, palmerpenguins, pymysql)
+# (incluimos FastAPI y Uvicorn para la API)
 # =========================================================
 RUN pip install --no-cache-dir \
     joblib \
     pandas \
     scikit-learn \
     palmerpenguins \
-    pymysql
+    pymysql \
+    SQLAlchemy \
+    fastapi \
+    "uvicorn[standard]"
 
 # =========================================================
 # Copiar el paquete de Python al root de Airflow
