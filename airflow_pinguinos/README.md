@@ -45,6 +45,7 @@ El sistema está compuesto por:
 ---
 
 ### 5. Estructura del Proyecto
+
 airflow_pinguinos/
 │
 ├── dags/
