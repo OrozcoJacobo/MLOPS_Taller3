@@ -1,4 +1,3 @@
-
 import os
 from pathlib import Path
 
@@ -11,6 +10,7 @@ MYSQL_PORT = int(os.getenv("MYSQL_PORT", "3306"))
 MYSQL_USER = os.getenv("MYSQL_USER", "penguins_user")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "penguins_pass")
 MYSQL_DB = os.getenv("MYSQL_DB", "penguins_db")
+
 
 def get_mysql_url() -> str:
     """

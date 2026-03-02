@@ -13,6 +13,25 @@ services:
       interval: 5s
       retries: 5
 
+  penguins-db:
+    image: mysql:8.0
+    container_name: penguins-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: penguins_db
+      MYSQL_USER: penguins_user
+      MYSQL_PASSWORD: penguins_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - penguins_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   airflow-init:
     image: airflow-pinguinos:local
     depends_on:
@@ -30,18 +49,27 @@ services:
     restart: "no"
 
   airflow-webserver:
+    build: .
     image: airflow-pinguinos:local
     depends_on:
       postgres:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
+      penguins-db:                # 👈 nuevo: espera a MySQL
+        condition: service_healthy
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "False"
       AIRFLOW__WEBSERVER__SECRET_KEY: "supersecretkey"
       AIRFLOW__CORE__FERNET_KEY: "0123456789abcdef0123456789abcdef"
+      # Opcional, pero explícito para tu config.py
+      MYSQL_HOST: penguins-db
+      MYSQL_PORT: "3306"
+      MYSQL_USER: penguins_user
+      MYSQL_PASSWORD: penguins_pass
+      MYSQL_DB: penguins_db
     ports:
       - "8080:8080"
     command: webserver
@@ -54,14 +82,23 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
+      penguins-db:                # 👈 nuevo: espera a MySQL
+        condition: service_healthy
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "False"
       AIRFLOW__WEBSERVER__SECRET_KEY: "supersecretkey"
       AIRFLOW__CORE__FERNET_KEY: "0123456789abcdef0123456789abcdef"
+      MYSQL_HOST: penguins-db
+      MYSQL_PORT: "3306"
+      MYSQL_USER: penguins_user
+      MYSQL_PASSWORD: penguins_pass
+      MYSQL_DB: penguins_db
     command: scheduler
     restart: always
 
 volumes:
   postgres_data:
+  airflow_logs:
+  penguins_db_data:
