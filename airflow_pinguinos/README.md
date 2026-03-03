@@ -97,7 +97,7 @@ Usuario:
 Contraseña:
 `admin`
 
-![Texto Alternativo](images/airflow.png)
+![Texto Alternativo](images/airflow1.png)
 
 ![Texto Alternativo](images/airflow2.png)
 
@@ -116,6 +116,9 @@ Cuando termine correctamente, los modelos deben existir en:
 ```bash
 /opt/airflow/models
 ```
+![Texto Alternativo](images/dag1.png)
+
+![Texto Alternativo](images/dag2.png)
 
 ### 9. Probar Inferencia
 * Ejemplo de entrada:
@@ -141,7 +144,7 @@ Cuando termine correctamente, los modelos deben existir en:
 ### 10. Problema Común: Carpeta models Vacía o Permisos Incorrectos
 En algunos sistemas, el volumen models_dir puede crearse con permisos incorrectos.
 
-Si el DAG entrena pero no aparecen modelos, ejecutar:
+Si el DAG entrena pero no aparecen modelos o si la última actividad del pipeline llamada "train_models" falla, ejecutar:
 
 ```bash
 docker compose exec -u root airflow-scheduler \
@@ -150,19 +153,20 @@ bash -c "mkdir -p /opt/airflow/models && chown -R airflow: /opt/airflow/models"
 docker compose exec -u root airflow-webserver \
 bash -c "mkdir -p /opt/airflow/models && chown -R airflow: /opt/airflow/models"
 ```
-
 Luego volver a ejecutar el DAG y verificar:
 ```bash
 docker compose exec airflow-scheduler ls -l /opt/airflow/models
 ```
 
-Deben verse:
+Lista a visualizar:
 * rf.joblib
 * logreg.joblib
 * svm.joblib
 * gb.joblib
 * knn.joblib
 * registry.joblib
+
+![Texto Alternativo](images/models.png)
 
 ### 11. Servicios Incluidos en Docker Compose
 Todos los servicios requeridos en el taller existen en un unico docker-compose.yaml
