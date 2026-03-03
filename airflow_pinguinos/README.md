@@ -67,21 +67,19 @@ airflow_pinguinos/
 ### 6. Levantar Todos Los Servicios 
 ```bash
 docker compose build
-
+```
 ![Texto Alternativo](images/api/dockerbuild.png)
 
+```bash
 docker compose up -d
-
-![Texto Alternativo](images/api/dockerup.png)
-
 ```
+![Texto Alternativo](images/api/dockerup.png)
 
 ```bash
 docker compose ps
-
+```
 ![Texto Alternativo](images/api/dockerps.png)
 
-```
 Debe aparecer:
 	•	airflow-webserver
 	•	airflow-scheduler
@@ -93,25 +91,21 @@ Debe aparecer:
 Airflow UI: 
 ```bash
 http://localhost:8080
+```
+Usuario:
+`admin`
+Contraseña:
+`admin`
 
 ![Texto Alternativo](images/api/airflow.png)
 
 ![Texto Alternativo](images/api/airflow2.png)
 
-```
-Usuario:
-`admin`
-
-Contrasena:
-`admin`
-
 API Swagger
 ```bash
 http://localhost:8000/docs
-
-![Texto Alternativo](images/api/api.png)
-
 ```
+![Texto Alternativo](images/api/api.png)
 
 ### 8. Entrenamiento 
 * Ir a Airflow UI
