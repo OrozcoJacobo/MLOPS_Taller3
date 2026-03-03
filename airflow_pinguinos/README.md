@@ -68,17 +68,17 @@ airflow_pinguinos/
 ```bash
 docker compose build
 ```
-![Texto Alternativo](images/api/dockerbuild.png)
+![Texto Alternativo](images/dockerbuild.png)
 
 ```bash
 docker compose up -d
 ```
-![Texto Alternativo](images/api/dockerup.png)
+![Texto Alternativo](images/dockerup.png)
 
 ```bash
 docker compose ps
 ```
-![Texto Alternativo](images/api/dockerps.png)
+![Texto Alternativo](images/dockerps.png)
 
 Debe aparecer:
 	•	airflow-webserver
@@ -97,15 +97,15 @@ Usuario:
 Contraseña:
 `admin`
 
-![Texto Alternativo](images/api/airflow.png)
+![Texto Alternativo](images/airflow.png)
 
-![Texto Alternativo](images/api/airflow2.png)
+![Texto Alternativo](images/airflow2.png)
 
 API Swagger
 ```bash
 http://localhost:8000/docs
 ```
-![Texto Alternativo](images/api/api.png)
+![Texto Alternativo](images/api.png)
 
 ### 8. Entrenamiento 
 * Ir a Airflow UI
