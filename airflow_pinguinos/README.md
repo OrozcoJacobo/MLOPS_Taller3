@@ -1,5 +1,9 @@
 # MLOPS_Taller3 – Pipeline ML con Airflow + API + Docker Compose
 
+# Presentado Por
+- Jacobo Orozco Ardila
+- Javier Chaparro
+
 ## Descripción General
 
 Este proyecto implementa un pipeline completo de Machine Learning usando:
