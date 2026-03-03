@@ -46,6 +46,7 @@ El sistema está compuesto por:
 
 ### 5. Estructura del Proyecto
 
+```bash
 airflow_pinguinos/
 │
 ├── dags/
@@ -63,9 +64,11 @@ airflow_pinguinos/
 ├── Dockerfile
 ├── pyproject.toml
 └── README.md
+```
 
 ### 6. Levantar Todos Los Servicios 
 ```bash
+cd airflow_pinguinos
 docker compose build
 ```
 ![Texto Alternativo](images/dockerbuild.png)
@@ -141,7 +144,7 @@ Cuando termine correctamente, los modelos deben existir en:
   "prediction": "Adelie"
 }
 ```
-### 10. Problema Común: Carpeta models Vacía o Permisos Incorrectos
+### 10. Problema Común: carpeta models Vacía o Permisos Incorrectos
 En algunos sistemas, el volumen models_dir puede crearse con permisos incorrectos.
 
 Si el DAG entrena pero no aparecen modelos o si la última actividad del pipeline llamada "train_models" falla, ejecutar:
