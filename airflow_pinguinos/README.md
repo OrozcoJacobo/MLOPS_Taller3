@@ -123,11 +123,13 @@ Cuando termine correctamente, los modelos deben existir en:
 
 ![Texto Alternativo](images/dag2.png)
 
-### 9. Probar Inferencia
+### 9. Probar Inferencia con API 
 * Ejemplo de entrada:
 
 ```bash
-{
+docker compose exec penguins-api curl -X POST "http://localhost:8000/predict" \
+-H "Content-Type: application/json" \
+-d '{
   "bill_length_mm": 39.1,
   "bill_depth_mm": 18.7,
   "flipper_length_mm": 181,
@@ -135,7 +137,7 @@ Cuando termine correctamente, los modelos deben existir en:
   "year": 2007,
   "island": "Torgersen",
   "sex": "male"
-}
+}'
 ```
 * Respuesta esperada
 
@@ -144,6 +146,15 @@ Cuando termine correctamente, los modelos deben existir en:
   "prediction": "Adelie"
 }
 ```
+![Texto Alternativo](images/apitest.png)
+
+Eventualmente si se obtiene un mensaje de que el modelo no existe, puede deberse a que la api se inició antes de que se ejecutara el pipeline de airflow; por lo tanto, se debe ejecutar la siguiente sentencia para reiniciar la api:
+
+```bash
+docker compose restart penguins-api 
+```
+Una vez se reinicia la api, se ejecuta de nuevo la solicitud de inferencia y es exitosa la respuesta.
+
 ### 10. Problema Común: carpeta models Vacía o Permisos Incorrectos
 En algunos sistemas, el volumen models_dir puede crearse con permisos incorrectos.
 
