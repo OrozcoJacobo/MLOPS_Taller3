@@ -47,4 +47,3 @@ COPY src/airflow_pinguinos ./airflow_pinguinos
 # Copiar DAGs y plugins de Airflow
 # =========================================================
 COPY dags ./dags
-COPY plugins ./plugins
