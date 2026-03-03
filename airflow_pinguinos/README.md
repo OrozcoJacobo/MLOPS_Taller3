@@ -152,12 +152,12 @@ docker compose exec penguins-api curl -X POST "http://localhost:8000/predict" \
 ```
 ![Texto Alternativo](images/apitest.png)
 
-Eventualmente si se obtiene un mensaje de que el modelo no existe, puede deberse a que la api se inició antes de que se ejecutara el pipeline de airflow; por lo tanto, se debe ejecutar la siguiente sentencia para reiniciar la api:
+Eventualmente si se obtiene un mensaje de que el modelo no existe, puede deberse a que el api se inició antes de que se ejecutara el pipeline de airflow; por lo tanto, se debe ejecutar la siguiente sentencia para reiniciarla:
 
 ```bash
 docker compose restart penguins-api 
 ```
-Una vez se reinicia la api, se ejecuta de nuevo la solicitud de inferencia y es exitosa la respuesta.
+Una vez se reinicia el api, se ejecuta de nuevo la solicitud de inferencia y es exitosa la respuesta.
 
 ### 10. Problema Común: carpeta models Vacía o Permisos Incorrectos
 En algunos sistemas, el volumen models_dir puede crearse con permisos incorrectos.
